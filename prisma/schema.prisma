@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  nickname  String
+  pin       String
+  code      String     @unique  // número de 3 dígitos
+  createdAt DateTime   @default(now())
+  challenges UserChallenge[]
+}
+
+model Challenge {
+  id          Int      @id @default(autoincrement())
+  type        String   // Matemáticas o Lectura
+  question    String
+  answer      String
+  createdAt   DateTime @default(now())
+  userChallenges UserChallenge[]
+}
+
+model UserChallenge {
+  id           Int      @id @default(autoincrement())
+  user         User     @relation(fields: [userId], references: [id])
+  userId       Int
+  challenge    Challenge @relation(fields: [challengeId], references: [id])
+  challengeId  Int
+  assignedAt   DateTime @default(now())
+  completedAt  DateTime?
+  correct      Boolean?
+  timeSeconds  Int?
+}

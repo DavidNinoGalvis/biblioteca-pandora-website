@@ -19,7 +19,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className={`${quicksand.className} bg-cream text-gray-800`}>
+      {/* Adding cz-shortcut-listen to prevent hydration mismatch from browser extensions */}
+      <body 
+        className={`${quicksand.className} bg-cream text-gray-800`}
+        cz-shortcut-listen="true"
+      >
         <Navbar />
         <main className="flex flex-col items-center justify-center min-h-screen pt-32 p-6">
           {children}

@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { BookOpen, Timer, Trophy, LogIn, Target, Star, Play, Pause, X } from "lucide-react";
+import { BookOpen, Trophy, LogIn, Target, Star } from "lucide-react";
 
 type User = {
   nickname: string;
@@ -10,14 +11,11 @@ type User = {
 };
 
 export default function Navbar() {
+  const router = useRouter();
   const [nickname, setNickname] = useState("");
   const [pin, setPin] = useState("");
   const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState("");
-  const [assignedChallenge, setAssignedChallenge] = useState<string | null>(null);
-  const [running, setRunning] = useState(false);
-  const [seconds, setSeconds] = useState(0);
-  const timerRef = useRef<number | null>(null);
 
   // Load user from storage
   useEffect(() => {
@@ -26,23 +24,6 @@ export default function Navbar() {
       if (raw) setUser(JSON.parse(raw));
     } catch {}
   }, []);
-
-  // Timer logic
-  useEffect(() => {
-    if (running) {
-      timerRef.current = window.setInterval(() => {
-        setSeconds((s) => s + 1);
-      }, 1000);
-    } else {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-    }
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [running]);
 
   const validatePin = (p: string) => /^\d{4}$/.test(p);
 
@@ -56,30 +37,26 @@ export default function Navbar() {
     localStorage.setItem("bp_user", JSON.stringify(u));
     setNickname("");
     setPin("");
+    
+    // Redirect to dashboard after successful login
+    router.push("/dashboard");
   };
 
   const handleLogout = () => {
     setUser(null);
-    setAssignedChallenge(null);
-    setRunning(false);
-    setSeconds(0);
     localStorage.removeItem("bp_user");
+    router.push("/");
   };
 
   const assignChallenge = () => {
     const types = ["Matemáticas", "Lectura crítica"];
     const chosen = types[Math.floor(Math.random() * types.length)];
-    setAssignedChallenge(chosen);
-    setSeconds(0);
-    setRunning(true);
-  };
-
-  const formatTime = (secs: number) => {
-    const m = Math.floor(secs / 60)
-      .toString()
-      .padStart(2, "0");
-    const s = (secs % 60).toString().padStart(2, "0");
-    return `${m}:${s}`;
+    
+    // Store the challenge type for the reto page
+    localStorage.setItem("bp_current_challenge_type", chosen);
+    
+    // Redirect to reto page
+    router.push("/reto");
   };
 
   return (
@@ -210,102 +187,6 @@ export default function Navbar() {
           </div>
         </div>
       </nav>
-
-      {/* Tarjeta flotante del reto */}
-      <AnimatePresence>
-        {assignedChallenge && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8, y: -20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.8, y: -20 }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            className="fixed top-28 left-1/2 -translate-x-1/2 z-50"
-          >
-            {/* Borde decorativo con color principal */}
-            <div className="bg-blueSky rounded-round shadow-medium p-1">
-              <div className="bg-white rounded-round p-6 w-80">
-                {/* Header del reto */}
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex items-center gap-2">
-                    <div className="bg-yellowWarm rounded-full p-2 border-2 border-orangeAccent">
-                      <Target className="w-5 h-5 text-orangeAccent" />
-                    </div>
-                    <div>
-                      <div className="text-xs text-grayMuted font-semibold">Tu Reto</div>
-                      <div className="text-xl font-black text-gray-800">{assignedChallenge}</div>
-                    </div>
-                  </div>
-                  <motion.button
-                    whileHover={{ scale: 1.1, rotate: 90 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => {
-                      setRunning(false);
-                      setSeconds(0);
-                      setAssignedChallenge(null);
-                    }}
-                    className="text-grayMuted hover:text-gray-800 transition-colors bg-transparent shadow-none p-1"
-                  >
-                    <X className="w-6 h-6" />
-                  </motion.button>
-                </div>
-
-                {/* Cronómetro grande */}
-                <div className="bg-yellowWarm rounded-soft p-6 mb-4 border-2 border-orangeAccent/20">
-                  <div className="flex flex-col items-center">
-                    <Timer className="w-10 h-10 text-blueDeep mb-2" />
-                    <div className="text-5xl font-black text-gray-800 tracking-wider">
-                      {formatTime(seconds)}
-                    </div>
-                    <div className="text-sm text-grayMuted font-semibold mt-1">
-                      {running ? "¡En marcha!" : "Pausado"}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Botones de control */}
-                <div className="flex gap-3">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setRunning((r) => !r)}
-                    className={`flex-1 flex items-center justify-center gap-2 ${
-                      running
-                        ? "bg-orangeAccent"
-                        : "bg-greenSuccess"
-                    }`}
-                  >
-                    {running ? (
-                      <>
-                        <Pause className="w-5 h-5 fill-white" />
-                        Pausar
-                      </>
-                    ) : (
-                      <>
-                        <Play className="w-5 h-5 fill-white" />
-                        Continuar
-                      </>
-                    )}
-                  </motion.button>
-                  
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => {
-                      setRunning(false);
-                      setSeconds(0);
-                      setAssignedChallenge(null);
-                    }}
-                    className="flex-1 bg-blueDeep flex items-center justify-center gap-2"
-                  >
-                    <Trophy className="w-5 h-5" />
-                    Terminar
-                  </motion.button>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </>
   );
 }
