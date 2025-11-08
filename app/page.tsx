@@ -90,7 +90,11 @@ export default function Home() {
               alt="Búho Pandora - Mascota de Biblioteca Pandora"
               width={200}
               height={200}
-              className="drop-shadow-2xl"
+              draggable={false}
+              onDragStart={(e) => e.preventDefault()}
+              onMouseDown={(e) => e.preventDefault()}
+              onTouchStart={(e) => e.preventDefault()}
+              className="drop-shadow-2xl select-none"
             />
             {/* Sparkle effect around owl */}
             <motion.div
