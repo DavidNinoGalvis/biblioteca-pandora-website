@@ -35,7 +35,7 @@ export default async function AdminDashboard() {
   });
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 pt-28 pb-12">
+  <main className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 pt-15 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
         {/* Header */}

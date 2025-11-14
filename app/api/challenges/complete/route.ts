@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     // Validar datos requeridos
     if (!userId || !type || timeInSeconds === undefined || isCorrect === undefined) {
       return NextResponse.json(
-        { error: 'Faltan datos requeridos' },
+        { error: 'Faltan datos requeridos', received: { userId, type, timeInSeconds, isCorrect } },
         { status: 400 }
       );
     }
@@ -29,12 +29,14 @@ export async function POST(request: NextRequest) {
       // Puntos base por tipo de reto
       const basePoints: { [key: string]: number } = {
         'lectura': 10,
+        'lecturacritica': 10,
+        'matematicas': 15,
         'memoria': 15,
         'palabra': 12,
         'adivinanza': 8,
       };
 
-      calculatedPoints = basePoints[type] || 10;
+      calculatedPoints = basePoints[type.toLowerCase()] || 10;
 
       // Bonus por tiempo (si completó en menos de 30 segundos)
       if (timeInSeconds < 30) {
@@ -64,7 +66,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error guardando reto:', error);
     return NextResponse.json(
-      { error: 'Error al guardar el reto' },
+      { error: 'Error al guardar el reto', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }

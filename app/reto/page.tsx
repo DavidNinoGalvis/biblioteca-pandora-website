@@ -120,19 +120,31 @@ export default function RetoPage() {
 
     // Save challenge to database via API
     try {
+      // Mapear el tipo de challenge a los tipos de la base de datos
+      const typeMapping: { [key: string]: string } = {
+        'Matemáticas': 'matematicas',
+        'Lectura crítica': 'lectura',
+      };
+      
+      const mappedType = typeMapping[challenge.type] || challenge.type.toLowerCase();
+
       const response = await fetch('/api/challenges/complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: user.id,
-          type: challenge.type.toLowerCase().replace(' ', ''), // "Matemáticas" -> "matematicas"
+          type: mappedType,
           timeInSeconds: seconds,
           isCorrect: correct,
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        console.error('Error saving challenge to database');
+        console.error('Error saving challenge to database:', data.error || 'Unknown error');
+      } else {
+        console.log('Challenge saved successfully:', data);
       }
     } catch (e) {
       console.error("Error saving challenge:", e);
@@ -148,7 +160,7 @@ export default function RetoPage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 px-3 md:px-6 lg:px-8 pt-32 pb-4 overflow-hidden">
+    <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 px-3 md:px-6 lg:px-8 pt-12 pb-4 overflow-hidden">
       <TimerBadge seconds={seconds} />
       
       <ChallengeTypeBadge type={challenge.type} />

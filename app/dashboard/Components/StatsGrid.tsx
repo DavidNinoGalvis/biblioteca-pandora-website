@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Target, Timer, Zap, Star } from "lucide-react";
+import { Target, Timer, Zap } from "lucide-react";
 
 type StatsGridProps = {
   totalChallenges: number;
@@ -19,7 +19,7 @@ export default function StatsGrid({ totalChallenges, avgTime, bestTime }: StatsG
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2, duration: 0.5 }}
-      className="grid gap-6 md:grid-cols-2 lg:grid-cols-4"
+      className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
     >
       {/* Total Challenges */}
       <motion.div
@@ -72,24 +72,7 @@ export default function StatsGrid({ totalChallenges, avgTime, bestTime }: StatsG
         <div className="text-sm text-grayMuted mt-1">¡Tu récord!</div>
       </motion.div>
 
-      {/* Streak */}
-      <motion.div
-        whileHover={{ y: -5 }}
-        className="card bg-gradient-to-br from-yellow-50 to-white border-2 border-yellowWarm"
-      >
-        <div className="flex items-center justify-between mb-3">
-          <div className="bg-gradient-to-br from-orangeAccent to-yellow-500 text-white rounded-full p-3">
-            <Star className="w-6 h-6" />
-          </div>
-          <div className="text-4xl font-black text-orangeAccent">
-            {totalChallenges > 0 ? "🔥" : "💤"}
-          </div>
-        </div>
-        <div className="font-bold text-gray-800">Racha activa</div>
-        <div className="text-sm text-grayMuted mt-1">
-          {totalChallenges > 0 ? "¡Sigue practicando!" : "Empieza tu racha"}
-        </div>
-      </motion.div>
+      {/* Streak removed per request */}
     </motion.section>
   );
 }
