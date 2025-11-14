@@ -5,8 +5,13 @@ import { useRouter } from "next/navigation";
 import { CountdownBadge, LeaderboardList, ResultsControls } from "./components";
 
 type LeaderboardEntry = {
-  name: string;
-  points: number;
+  userId: string;
+  nickname: string;
+  totalPoints: number;
+  rank: number;
+  correctChallenges: number;
+  totalChallenges: number;
+  accuracy: number;
 };
 
 function getNextSundayMidnight(now = new Date()) {
@@ -45,38 +50,37 @@ function useCountdown(target: Date) {
 export default function ResultadosPage() {
   const router = useRouter();
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [loading, setLoading] = useState(true);
   const nextSunday = useMemo(() => getNextSundayMidnight(), []);
   const lastSunday = useMemo(() => getLastSundayMidnight(), []);
   const countdown = useCountdown(nextSunday);
 
   useEffect(() => {
-    // Load leaderboard from localStorage (if any)
-    try {
-      const raw = localStorage.getItem("bp_leaderboard");
-      const stored = raw ? JSON.parse(raw) : [];
-      setLeaderboard(stored);
-
-      // Check last reset marker, if older than lastSunday we clear
-      const storedReset = localStorage.getItem("bp_leaderboard_last_reset");
-      const storedResetDate = storedReset ? new Date(storedReset) : null;
-      if (!storedResetDate || storedResetDate.getTime() < lastSunday.getTime()) {
-        // Clear leaderboard and store new reset marker
-        localStorage.removeItem("bp_leaderboard");
-        localStorage.setItem("bp_leaderboard_last_reset", lastSunday.toISOString());
-        setLeaderboard([]);
+    // Load leaderboard from API
+    const fetchLeaderboard = async () => {
+      try {
+        const response = await fetch('/api/leaderboard?period=week');
+        if (response.ok) {
+          const data = await response.json();
+          setLeaderboard(data.leaderboard || []);
+        }
+      } catch (e) {
+        console.error("Error loading leaderboard:", e);
+      } finally {
+        setLoading(false);
       }
-    } catch (e) {
-      console.error("Error reading leaderboard:", e);
-    }
-  }, [lastSunday]);
+    };
+
+    fetchLeaderboard();
+    
+    // Refresh leaderboard every 30 seconds
+    const interval = setInterval(fetchLeaderboard, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const addSample = () => {
-    // Helper to add random sample data (dev only)
-    const next = [...leaderboard];
-    next.push({ name: `Alumno ${next.length + 1}`, points: Math.floor(Math.random() * 100) });
-    next.sort((a, b) => b.points - a.points);
-    setLeaderboard(next);
-    localStorage.setItem("bp_leaderboard", JSON.stringify(next));
+    // This function is no longer needed as we're using the database
+    console.log("Sample data functionality removed - using database");
   };
 
   return (
@@ -107,8 +111,8 @@ export default function ResultadosPage() {
                   <div key={i} className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-full bg-blueSky text-white flex items-center justify-center font-bold">{i + 1}</div>
                     <div>
-                      <div className="font-bold text-sm">{e.name}</div>
-                      <div className="text-xs text-gray-500">{e.points} pts</div>
+                      <div className="font-bold text-sm">{e.nickname}</div>
+                      <div className="text-xs text-gray-500">{e.totalPoints} pts</div>
                     </div>
                   </div>
                 ))}
@@ -121,7 +125,7 @@ export default function ResultadosPage() {
             </div>
 
             <ResultsControls
-              onReset={() => { localStorage.removeItem('bp_leaderboard'); setLeaderboard([]); }}
+              onReset={() => { console.log("Reset functionality removed - using database"); }}
               onAddSample={addSample}
             />
           </aside>

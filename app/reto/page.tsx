@@ -12,8 +12,9 @@ import {
 } from "./components";
 
 type User = {
+  id: string;
   nickname: string;
-  pin: string;
+  role?: string;
 };
 
 type Challenge = {
@@ -109,30 +110,32 @@ export default function RetoPage() {
     setSelectedAnswer(index);
   };
 
-  const handleSubmit = () => {
-    if (selectedAnswer === null || !challenge) return;
+  const handleSubmit = async () => {
+    if (selectedAnswer === null || !challenge || !user) return;
     
     setTimerRunning(false);
     const correct = selectedAnswer === challenge.correctAnswer;
     setIsCorrect(correct);
     setShowResult(true);
 
-    // Save challenge to history
-    if (user) {
-      const challengeRecord = {
-        type: challenge.type,
-        timeInSeconds: seconds,
-        completedAt: new Date().toISOString(),
-      };
-      
-      try {
-        const existing = localStorage.getItem("bp_challenges");
-        const challenges = existing ? JSON.parse(existing) : [];
-        challenges.push(challengeRecord);
-        localStorage.setItem("bp_challenges", JSON.stringify(challenges));
-      } catch (e) {
-        console.error("Error saving challenge:", e);
+    // Save challenge to database via API
+    try {
+      const response = await fetch('/api/challenges/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          type: challenge.type.toLowerCase().replace(' ', ''), // "Matemáticas" -> "matematicas"
+          timeInSeconds: seconds,
+          isCorrect: correct,
+        }),
+      });
+
+      if (!response.ok) {
+        console.error('Error saving challenge to database');
       }
+    } catch (e) {
+      console.error("Error saving challenge:", e);
     }
   };
 

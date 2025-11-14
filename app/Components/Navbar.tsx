@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { BookOpen, Trophy, LogIn, Target, Star } from "lucide-react";
+import { BookOpen, Trophy, LogIn, Target, Star, Shield } from "lucide-react";
 
 type User = {
+  id: string;
   nickname: string;
-  pin: string;
+  role?: string;
 };
 
 export default function Navbar() {
@@ -27,19 +28,37 @@ export default function Navbar() {
 
   const validatePin = (p: string) => /^\d{4}$/.test(p);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setError("");
     if (!nickname.trim()) return setError("¡Necesitas un apodo!");
     if (!validatePin(pin)) return setError("El PIN debe tener 4 números");
 
-    const u: User = { nickname: nickname.trim(), pin };
-    setUser(u);
-    localStorage.setItem("bp_user", JSON.stringify(u));
-    setNickname("");
-    setPin("");
-    
-    // Redirect to dashboard after successful login
-    router.push("/dashboard");
+    try {
+      const response = await fetch('/api/auth/student', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nickname: nickname.trim(), pin }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Error al iniciar sesión');
+        return;
+      }
+
+      const u: User = data.user;
+      setUser(u);
+      localStorage.setItem("bp_user", JSON.stringify(u));
+      setNickname("");
+      setPin("");
+      
+      // Redirect to dashboard after successful login
+      router.push("/dashboard");
+    } catch (err) {
+      setError("Error de conexión. Intenta de nuevo.");
+      console.error("Login error:", err);
+    }
   };
 
   const handleLogout = () => {
@@ -175,16 +194,30 @@ export default function Navbar() {
               </AnimatePresence>
             </div>
 
-            {/* Botón de resultados */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => router.push('/resultados')}
-              className="bg-white text-gray-800 flex items-center gap-2"
-            >
-              <Trophy className="w-5 h-5 text-orangeAccent" />
-              <span>Tabla de posiciones</span>
-            </motion.button>
+            {/* Botones de navegación */}
+            <div className="flex items-center gap-3">
+              {/* Botón de Profesores */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => router.push('/admin')}
+                className="bg-white text-gray-800 flex items-center gap-2"
+              >
+                <Shield className="w-5 h-5 text-blueDeep" />
+                <span>Profesores</span>
+              </motion.button>
+
+              {/* Botón de Tabla de posiciones */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => router.push('/resultados')}
+                className="bg-white text-gray-800 flex items-center gap-2"
+              >
+                <Trophy className="w-5 h-5 text-orangeAccent" />
+                <span>Tabla de posiciones</span>
+              </motion.button>
+            </div>
           </div>
         </div>
       </nav>

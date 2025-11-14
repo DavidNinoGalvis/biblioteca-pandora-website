@@ -1,6 +1,11 @@
 type LeaderboardEntry = {
-  name: string;
-  points: number;
+  userId: string;
+  nickname: string;
+  totalPoints: number;
+  rank: number;
+  correctChallenges: number;
+  totalChallenges: number;
+  accuracy: number;
 };
 
 import { Crown, Zap, Star } from "lucide-react";
@@ -57,11 +62,11 @@ export default function LeaderboardList({ entries, onAddSample }: Props) {
             <div className="flex items-center gap-4">
               {badge}
               <div>
-                <div className="font-bold text-lg md:text-xl">{e.name}</div>
-                <div className="text-sm text-gray-500">{e.points} puntos</div>
+                <div className="font-bold text-lg md:text-xl">{e.nickname}</div>
+                <div className="text-sm text-gray-500">{e.correctChallenges}/{e.totalChallenges} correctos • {e.accuracy.toFixed(1)}%</div>
               </div>
             </div>
-            <div className="font-extrabold text-xl md:text-2xl text-gray-800">{e.points}</div>
+            <div className="font-extrabold text-xl md:text-2xl text-gray-800">{e.totalPoints}</div>
           </li>
         );
       })}
