@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { LogIn } from "lucide-react";
 
-export default function StudentLoginPage() {
+function StudentLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get("next") || "/dashboard";
@@ -98,5 +98,19 @@ export default function StudentLoginPage() {
         </div>
       </motion.div>
     </main>
+  );
+}
+
+export default function StudentLoginPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen flex items-center justify-center bg-white px-4">
+        <div className="text-center">
+          <div className="text-blueSky font-bold">Cargando...</div>
+        </div>
+      </main>
+    }>
+      <StudentLoginForm />
+    </Suspense>
   );
 }
