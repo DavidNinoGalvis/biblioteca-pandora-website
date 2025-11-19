@@ -7,7 +7,11 @@ import { UserPlus, Trash2, Eye, EyeOff, X, RefreshCw } from "lucide-react";
 type Student = {
   id: string;
   nickname: string;
+  firstName?: string | null;
+  lastName?: string | null;
   createdAt: string;
+  desescolarizado?: boolean;
+  hidden?: boolean;
 };
 
 type Props = {
@@ -17,9 +21,13 @@ type Props = {
 export default function StudentManager({ initialStudents }: Props) {
   const [students, setStudents] = useState<Student[]>(initialStudents);
   const [showModal, setShowModal] = useState(false);
-  const [nickname, setNickname] = useState("");
+  const [nickname] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [pin, setPin] = useState("");
   const [showPin, setShowPin] = useState(false);
+  const [desescolarizado, setDesescolarizado] = useState(false);
+  const [secretMessage, setSecretMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -28,12 +36,7 @@ export default function StudentManager({ initialStudents }: Props) {
     setError("");
     setLoading(true);
 
-    if (!nickname.trim()) {
-      setError("El apodo es requerido");
-      setLoading(false);
-      return;
-    }
-
+    // Nickname opcional — si queda vacío el backend generará uno aleatorio
     if (!/^\d{4}$/.test(pin)) {
       setError("El PIN debe tener 4 dígitos");
       setLoading(false);
@@ -44,7 +47,13 @@ export default function StudentManager({ initialStudents }: Props) {
       const response = await fetch("/api/admin/students", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nickname: nickname.trim(), pin }),
+        body: JSON.stringify({
+          nickname: nickname.trim(),
+          pin,
+          desescolarizado,
+          firstName,
+          lastName,
+        }),
       });
 
       const data = await response.json();
@@ -57,8 +66,15 @@ export default function StudentManager({ initialStudents }: Props) {
 
       // Agregar el nuevo estudiante a la lista
       setStudents([data.student, ...students]);
-      setNickname("");
+      // Mostrar apodo secreto si el backend lo devuelve
+      if (data.secretMessage) {
+        setSecretMessage(data.secretMessage);
+        setTimeout(() => setSecretMessage(""), 12000);
+      }
+      setFirstName("");
+      setLastName("");
       setPin("");
+      setDesescolarizado(false);
       setShowModal(false);
       setError("");
     } catch (err) {
@@ -92,6 +108,31 @@ export default function StudentManager({ initialStudents }: Props) {
     }
   };
 
+  const handleToggleVisibility = async (id: string, currentHidden: boolean) => {
+    try {
+      const response = await fetch(`/api/admin/users/${id}/visibility`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hidden: !currentHidden }),
+      });
+
+      if (!response.ok) {
+        alert("Error al cambiar visibilidad");
+        return;
+      }
+
+      // Actualizar el estado local
+      setStudents(
+        students.map((s) =>
+          s.id === id ? { ...s, hidden: !currentHidden } : s
+        )
+      );
+    } catch (err) {
+      console.error("Error toggling visibility:", err);
+      alert("Error al cambiar visibilidad");
+    }
+  };
+
   const refreshStudents = async () => {
     try {
       const response = await fetch("/api/admin/students");
@@ -109,9 +150,12 @@ export default function StudentManager({ initialStudents }: Props) {
       {/* Header con botón de crear */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Gestión de Estudiantes</h2>
+          <h2 className="text-2xl font-bold text-gray-800">
+            Gestión de Estudiantes
+          </h2>
           <p className="text-sm text-gray-500">
-            Total: {students.length} estudiante{students.length !== 1 ? "s" : ""}
+            Total: {students.length} estudiante
+            {students.length !== 1 ? "s" : ""}
           </p>
         </div>
         <div className="flex gap-2">
@@ -128,7 +172,7 @@ export default function StudentManager({ initialStudents }: Props) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowModal(true)}
-            className="bg-gradient-to-r from-blueSky to-blue-600 text-white px-6 py-2 rounded-lg font-bold flex items-center gap-2 shadow-md hover:shadow-lg transition-shadow"
+            className="bg-linear-to-r from-blueSky to-blue-600 text-white px-6 py-2 rounded-lg font-bold flex items-center gap-2 shadow-md hover:shadow-lg transition-shadow"
           >
             <UserPlus className="w-5 h-5" />
             Crear Estudiante
@@ -142,7 +186,9 @@ export default function StudentManager({ initialStudents }: Props) {
           <div className="p-12 text-center text-gray-500">
             <UserPlus className="w-16 h-16 mx-auto mb-4 text-gray-300" />
             <p className="text-lg font-semibold mb-2">No hay estudiantes aún</p>
-            <p className="text-sm">Crea tu primer estudiante usando el botón de arriba</p>
+            <p className="text-sm">
+              Crea tu primer estudiante usando el botón de arriba
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -151,6 +197,9 @@ export default function StudentManager({ initialStudents }: Props) {
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
                     Apodo
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                    Nombre completo
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
                     Fecha de creación
@@ -171,11 +220,31 @@ export default function StudentManager({ initialStudents }: Props) {
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blueSky to-blue-600 text-white flex items-center justify-center font-bold text-lg mr-3">
+                        <div className="w-10 h-10 rounded-full bg-linear-to-br from-blueSky to-blue-600 text-white flex items-center justify-center font-bold text-lg mr-3">
                           {student.nickname.charAt(0).toUpperCase()}
                         </div>
-                        <div className="text-sm font-bold text-gray-800">{student.nickname}</div>
+                        <div className="text-sm font-bold text-gray-800 flex items-center gap-2">
+                          <span>{student.nickname}</span>
+                          {student.desescolarizado && (
+                            <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full font-semibold">
+                              Desescolarizado
+                            </span>
+                          )}
+                        </div>
                       </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                      {student.firstName || student.lastName ? (
+                        <div className="font-semibold">
+                          {[student.firstName, student.lastName]
+                            .filter(Boolean)
+                            .join(" ")}
+                        </div>
+                      ) : (
+                        <span className="text-gray-400 italic">
+                          No registrado
+                        </span>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Date(student.createdAt).toLocaleDateString("es-ES", {
@@ -185,14 +254,40 @@ export default function StudentManager({ initialStudents }: Props) {
                       })}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={() => handleDeleteStudent(student.id, student.nickname)}
-                        className="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </motion.button>
+                      <div className="flex items-center justify-end gap-2">
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() =>
+                            handleToggleVisibility(
+                              student.id,
+                              student.hidden || false
+                            )
+                          }
+                          className={`p-2 rounded-lg transition-colors ${
+                            student.hidden
+                              ? "text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                              : "text-blueSky hover:text-blue-700 hover:bg-blue-50"
+                          }`}
+                          title={student.hidden ? "Mostrar en ranking" : "Ocultar del ranking"}
+                        >
+                          {student.hidden ? (
+                            <EyeOff className="w-5 h-5" />
+                          ) : (
+                            <Eye className="w-5 h-5" />
+                          )}
+                        </motion.button>
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() =>
+                            handleDeleteStudent(student.id, student.nickname)
+                          }
+                          className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-colors"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </motion.button>
+                      </div>
                     </td>
                   </motion.tr>
                 ))}
@@ -221,7 +316,9 @@ export default function StudentManager({ initialStudents }: Props) {
             >
               <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
                 <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-2xl font-black text-gray-800">Crear Estudiante</h3>
+                  <h3 className="text-2xl font-black text-gray-800">
+                    Crear Estudiante
+                  </h3>
                   <button
                     onClick={() => setShowModal(false)}
                     className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -231,18 +328,63 @@ export default function StudentManager({ initialStudents }: Props) {
                 </div>
 
                 <form onSubmit={handleCreateStudent} className="space-y-4">
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm text-slate-700">
+                    <div className="font-bold text-blue-800 mb-1">
+                      Apodo secreto
+                    </div>
+                    <p>
+                      Generaremos un apodo aleatorio (
+                      <strong>“Apodo secreto, ¡No le digas a nadie!”</strong>)
+                      automáticamente. Compártelo con el estudiante para que
+                      pueda iniciar sesión y aparecer en el ranking.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">
+                        Nombre
+                      </label>
+                      <input
+                        type="text"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        placeholder="Nombre real"
+                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blueSky focus:outline-none text-base"
+                        disabled={loading}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">
+                        Apellido
+                      </label>
+                      <input
+                        type="text"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        placeholder="Apellido real"
+                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blueSky focus:outline-none text-base"
+                        disabled={loading}
+                      />
+                    </div>
+                  </div>
+
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">
-                      Apodo del estudiante
+                    <label className="inline-flex items-center gap-2 mt-2">
+                      <input
+                        type="checkbox"
+                        checked={desescolarizado}
+                        onChange={(e) => setDesescolarizado(e.target.checked)}
+                        className="w-4 h-4 rounded"
+                      />
+                      <span className="text-sm text-gray-700 font-medium">
+                        Desescolarizado
+                      </span>
                     </label>
-                    <input
-                      type="text"
-                      value={nickname}
-                      onChange={(e) => setNickname(e.target.value)}
-                      placeholder="Ej: Juan, Maria, Pedro..."
-                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blueSky focus:outline-none text-base"
-                      disabled={loading}
-                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Marca esta casilla si el estudiante está desescolarizado.
+                      Las estadísticas se separarán.
+                    </p>
                   </div>
 
                   <div>
@@ -253,7 +395,9 @@ export default function StudentManager({ initialStudents }: Props) {
                       <input
                         type={showPin ? "text" : "password"}
                         value={pin}
-                        onChange={(e) => setPin(e.target.value.replace(/[^0-9]/g, ""))}
+                        onChange={(e) =>
+                          setPin(e.target.value.replace(/[^0-9]/g, ""))
+                        }
                         maxLength={4}
                         placeholder="••••"
                         className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blueSky focus:outline-none text-center text-2xl tracking-widest"
@@ -295,7 +439,7 @@ export default function StudentManager({ initialStudents }: Props) {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="flex-1 bg-gradient-to-r from-greenSuccess to-green-600 text-white px-6 py-3 rounded-xl font-bold shadow-md hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                      className="flex-1 bg-linear-to-r from-greenSuccess to-green-600 text-white px-6 py-3 rounded-xl font-bold shadow-md hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                       {loading ? (
                         <>
@@ -311,6 +455,21 @@ export default function StudentManager({ initialStudents }: Props) {
                     </button>
                   </div>
                 </form>
+                {secretMessage && (
+                  <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
+                    <div className="font-bold">Apodo secreto</div>
+                    <div className="mt-1">
+                      {secretMessage.replace(
+                        "Apodo secreto, ¡No le digas a nadie! ",
+                        ""
+                      )}
+                    </div>
+                    <div className="text-xs text-gray-600 mt-2">
+                      Muestra este apodo al estudiante y no lo compartas
+                      públicamente.
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
           </>

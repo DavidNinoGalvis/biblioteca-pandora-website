@@ -8,12 +8,12 @@ const quicksand = Quicksand({
 });
 
 export const metadata = {
-  title: "Biblioteca Pandora",
-  description: "Retos diarios para pequeños exploradores. Desafía tu mente con matemáticas y lectura crítica.",
+  title: "Mundo Pandora",
+  description: "Un mundo-juego educativo: retos y aventuras para pequeños exploradores. Matemáticas, lectura crítica y diversión.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://biblioteca-pandora.vercel.app'),
   openGraph: {
-    title: "Biblioteca Pandora",
-    description: "Retos diarios para pequeños exploradores. Desafía tu mente con matemáticas y lectura crítica.",
+    title: "Mundo Pandora",
+    description: "Un mundo-juego educativo: retos y aventuras para pequeños exploradores.",
     url: '/',
     siteName: 'Biblioteca Pandora',
     images: [
@@ -29,8 +29,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Biblioteca Pandora',
-    description: 'Retos diarios para pequeños exploradores',
+    title: 'Mundo Pandora',
+    description: 'Un mundo-juego educativo: retos diarios para pequeños exploradores',
     images: ['/og-image.png?v=2'],
   },
   icons: {

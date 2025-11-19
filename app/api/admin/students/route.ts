@@ -10,7 +10,10 @@ export async function GET(request: NextRequest) {
       select: {
         id: true,
         nickname: true,
+        firstName: true,
+        lastName: true,
         createdAt: true,
+        desescolarizado: true,
       },
       orderBy: { createdAt: "desc" },
     });
@@ -28,11 +31,17 @@ export async function GET(request: NextRequest) {
 // POST - Crear nuevo estudiante
 export async function POST(request: NextRequest) {
   try {
-    const { nickname, pin } = await request.json();
+    const {
+      nickname: rawNickname,
+      pin,
+      desescolarizado,
+      firstName,
+      lastName,
+    } = await request.json();
 
-    if (!nickname || !pin) {
+    if (!pin) {
       return NextResponse.json(
-        { error: "Nickname y PIN son requeridos" },
+        { error: "El PIN es requerido" },
         { status: 400 }
       );
     }
@@ -44,32 +53,73 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verificar si el nickname ya existe
-    const existing = await prisma.user.findUnique({
-      where: { nickname },
-    });
+    // Generador simple de apodos aleatorios
+    const adjectives = [
+      "Rayo",
+      "Valiente",
+      "Sabio",
+      "Luna",
+      "Fiero",
+      "Traveso",
+      "Brisa",
+      "Ágil",
+      "Zafiro",
+      "Brillante",
+    ];
+    const animals = [
+      "Búho",
+      "Zorro",
+      "Tortuga",
+      "Cóndor",
+      "León",
+      "Buho",
+      "Búho",
+      "Gato",
+      "Lobo",
+      "Águila",
+    ];
 
-    if (existing) {
-      return NextResponse.json(
-        { error: "Este apodo ya está en uso" },
-        { status: 400 }
-      );
+    const generateNickname = () => {
+      const a = adjectives[Math.floor(Math.random() * adjectives.length)];
+      const b = animals[Math.floor(Math.random() * animals.length)];
+      const num = Math.floor(Math.random() * 90) + 10; // 10-99
+      return `${a}${b}${num}`;
+    };
+
+    let nickname =
+      rawNickname && rawNickname.trim()
+        ? rawNickname.trim()
+        : generateNickname();
+
+    // Asegurar unicidad (reintentos limitados)
+    let attempt = 0;
+    while (attempt < 6) {
+      const existing = await prisma.user.findUnique({ where: { nickname } });
+      if (!existing) break;
+      nickname = generateNickname();
+      attempt++;
     }
 
     // Encriptar PIN
     const hashedPin = await hashPin(pin);
 
-    // Crear estudiante
+    // Crear estudiante incluyendo campo desescolarizado (si viene)
     const student = await prisma.user.create({
       data: {
         nickname,
         pin: hashedPin,
         role: "student",
+        desescolarizado: !!desescolarizado,
+        firstName: firstName?.trim() || null,
+        lastName: lastName?.trim() || null,
       },
       select: {
         id: true,
         nickname: true,
+        firstName: true,
+        lastName: true,
         createdAt: true,
+        desescolarizado: true,
       },
     });
 
@@ -77,6 +127,7 @@ export async function POST(request: NextRequest) {
       success: true,
       student,
       message: "Estudiante creado exitosamente",
+      secretMessage: `Apodo secreto, ¡No le digas a nadie! ${student.nickname}`,
     });
   } catch (error) {
     console.error("Error al crear estudiante:", error);

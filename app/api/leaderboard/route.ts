@@ -23,9 +23,12 @@ export async function GET(request: NextRequest) {
       weekStart = new Date(now.getFullYear(), now.getMonth(), 1);
     }
 
-    // Obtener todos los usuarios estudiantes
+    // Obtener todos los usuarios estudiantes (excluir ocultos)
     const students = await prisma.user.findMany({
-      where: { role: 'student' },
+      where: { 
+        role: 'student',
+        hidden: false,
+      },
       select: {
         id: true,
         nickname: true,

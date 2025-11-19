@@ -1,4 +1,4 @@
-# 🎓 Biblioteca Pandora - Sistema de Gestión de Estudiantes y Ranking
+# Biblioteca Pandora - Sistema de Gestión de Estudiantes y Ranking
 
 ## Resumen de Implementación
 
@@ -6,61 +6,61 @@ Este documento describe las funcionalidades implementadas para migrar el sistema
 
 ---
 
-## ✅ Funcionalidades Implementadas
+## Funcionalidades Implementadas
 
 ### 1. **Configuración de Variables de Entorno**
-- ✅ Creación de `.env.local` y `.env.example`
-- ✅ Variables configuradas:
+-- Creación de `.env.local` y `.env.example`
+-- Variables configuradas:
   - `DATABASE_URL`: Conexión a Neon PostgreSQL
   - `ADMIN_PASSWORD`: Password para acceso de profesores
   - `NEXTAUTH_SECRET`: Token secreto para autenticación
   - `NEXTAUTH_URL`: URL de la aplicación
-- ✅ Documentación en `ENV_SETUP.md` para sincronizar con Vercel
+-- Documentación en `ENV_SETUP.md` para sincronizar con Vercel
 
 ### 2. **Botón "Profesores" en Navbar**
-- ✅ Agregado botón con icono Shield en el header
-- ✅ Redirige a `/admin` para login de profesores
-- ✅ Ubicado antes del botón "Tabla de posiciones"
+-- Agregado botón con icono Shield en el header
+-- Redirige a `/admin` para login de profesores
+-- Ubicado antes del botón "Tabla de posiciones"
 
 ### 3. **Base de Datos Neon PostgreSQL**
-- ✅ Instalación de dependencias:
+-- Instalación de dependencias:
   - `@vercel/postgres`
   - `bcryptjs` (para encriptación de PINs)
   - `next-auth` (para autenticación)
   - `@types/bcryptjs`
   - `@types/jsonwebtoken`
-- ✅ Schema de Prisma con 3 tablas principales:
+-- Schema de Prisma con 3 tablas principales:
   - **User**: id, nickname (único), pin (encriptado), role (student/admin)
   - **QuestionBank**: banco de preguntas reutilizables
   - **CompletedChallenge**: retos completados con puntos, tiempo, fecha
-- ✅ Base de datos sincronizada con `npx prisma db push`
+-- Base de datos sincronizada con `npx prisma db push`
 
 ### 4. **Sistema de Login para Profesores**
-- ✅ Página `/admin` con formulario de password
-- ✅ API `/api/admin/login` que valida contra `ADMIN_PASSWORD`
-- ✅ Redirección a `/admin/dashboard` tras login exitoso
-- ✅ Autenticación con token y cookie httpOnly
+-- Página `/admin` con formulario de password
+-- API `/api/admin/login` que valida contra `ADMIN_PASSWORD`
+-- Redirección a `/admin/dashboard` tras login exitoso
+-- Autenticación con token y cookie httpOnly
 
 ### 5. **Dashboard Administrativo**
-- ✅ API `/api/admin/students` con endpoints:
+-- API `/api/admin/students` con endpoints:
   - **GET**: Listar todos los estudiantes
   - **POST**: Crear estudiante (nickname + PIN de 4 dígitos)
   - **DELETE**: Eliminar estudiante por ID
-- ✅ Validación de nickname único
-- ✅ PINs encriptados con bcryptjs antes de guardar
-- ✅ Dashboard existente en `/admin/dashboard` (listo para integrar UI de estudiantes)
+-- Validación de nickname único
+-- PINs encriptados con bcryptjs antes de guardar
+-- Dashboard existente en `/admin/dashboard` (listo para integrar UI de estudiantes)
 
 ### 6. **API Routes para Retos y Ranking**
-- ✅ **POST `/api/challenges/complete`**:
+-- **POST `/api/challenges/complete`**:
   - Guarda retos completados en la base de datos
   - Calcula puntos automáticamente según:
     - Tipo de reto (lectura: 10, memoria: 15, palabra: 12, adivinanza: 8)
     - Bonus por tiempo (< 30 seg: +5 pts, < 60 seg: +2 pts)
   - Registra fecha de inicio de semana para ranking semanal
-- ✅ **GET `/api/challenges/complete?userId=X`**: 
+-- **GET `/api/challenges/complete?userId=X`**: 
   - Obtiene historial de retos de un usuario
   - Filtro opcional por tipo de reto
-- ✅ **GET `/api/leaderboard?period=week|month|all`**:
+-- **GET `/api/leaderboard?period=week|month|all`**:
   - Obtiene ranking de estudiantes
   - Calcula estadísticas:
     - Total de puntos
@@ -71,24 +71,24 @@ Este documento describe las funcionalidades implementadas para migrar el sistema
   - Incluye posición/rank de cada estudiante
 
 ### 7. **Login de Estudiantes con Base de Datos**
-- ✅ API **POST `/api/auth/student`**:
+-- API **POST `/api/auth/student`**:
   - Valida nickname y PIN contra la base de datos
   - Verifica PIN encriptado con bcrypt
   - Retorna datos del usuario (id, nickname, role)
-- ✅ Navbar actualizado para usar la API:
+-- Navbar actualizado para usar la API:
   - Ya no crea usuarios locales
   - Login requiere cuenta creada por profesor
   - Guarda usuario en localStorage con ID de DB
 
 ### 8. **Guardado de Retos en Base de Datos**
-- ✅ Componente `/reto` actualizado:
+-- Componente `/reto` actualizado:
   - Tipo User actualizado con `id` y `role`
   - `handleSubmit` ahora usa `fetch` a `/api/challenges/complete`
   - Envía: userId, type, timeInSeconds, isCorrect
   - Reemplaza completamente localStorage
 
 ### 9. **Tabla de Ranking desde Base de Datos**
-- ✅ Página `/resultados` actualizada:
+-- Página `/resultados` actualizada:
   - Tipo LeaderboardEntry con datos completos:
     - userId, nickname, totalPoints
     - rank, correctChallenges, totalChallenges
@@ -96,14 +96,14 @@ Este documento describe las funcionalidades implementadas para migrar el sistema
   - `useEffect` hace fetch a `/api/leaderboard?period=week`
   - Auto-refresh cada 30 segundos
   - Ya no usa localStorage
-- ✅ Componente LeaderboardList actualizado:
+- Componente LeaderboardList actualizado:
   - Muestra nickname en lugar de name
   - Muestra estadísticas: "X/Y correctos • Z.Z%"
   - Muestra totalPoints en grande
 
 ---
 
-## 🗂️ Estructura de Archivos Creados/Modificados
+## Estructura de Archivos Creados/Modificados
 
 ### Archivos de Configuración
 ```
@@ -138,7 +138,7 @@ app/resultados/components/LeaderboardList.tsx # Lista actualizada (modificado)
 
 ---
 
-## 🔐 Seguridad Implementada
+## Seguridad Implementada
 
 1. **PINs Encriptados**: Todos los PINs de estudiantes se guardan con bcrypt (salt 10)
 2. **Validación de Datos**: 
@@ -150,7 +150,7 @@ app/resultados/components/LeaderboardList.tsx # Lista actualizada (modificado)
 
 ---
 
-## 📊 Schema de Base de Datos
+## Schema de Base de Datos
 
 ### Tabla: User
 | Campo      | Tipo     | Descripción                    |
@@ -188,7 +188,7 @@ app/resultados/components/LeaderboardList.tsx # Lista actualizada (modificado)
 
 ---
 
-## 🚀 Próximos Pasos
+## Próximos Pasos
 
 ### Funcionalidades Pendientes
 1. **UI del Dashboard Admin**: 
@@ -215,7 +215,7 @@ app/resultados/components/LeaderboardList.tsx # Lista actualizada (modificado)
 
 ---
 
-## 📝 Comandos Útiles
+## Comandos Útiles
 
 ### Desarrollo
 ```bash
@@ -246,7 +246,7 @@ vercel --prod
 
 ---
 
-## 🔄 Migración de Datos
+## Migración de Datos
 
 Si tienes datos previos en localStorage, puedes migrarlos manualmente:
 
@@ -258,7 +258,7 @@ Si tienes datos previos en localStorage, puedes migrarlos manualmente:
 
 ---
 
-## ✨ Créditos
+## Créditos
 
 Sistema desarrollado para **Biblioteca Pandora** - Plataforma educativa de desafíos para estudiantes.
 

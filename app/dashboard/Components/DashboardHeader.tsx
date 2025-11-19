@@ -18,7 +18,7 @@ export default function DashboardHeader({ nickname }: DashboardHeaderProps) {
         </div>
         <div>
           <h1 className="text-4xl font-black text-gray-800">
-            ¡Hola, {nickname}! 👋
+            ¡Hola, {nickname}!
           </h1>
           <p className="text-grayMuted text-lg">
             Aquí está tu progreso de aprendizaje

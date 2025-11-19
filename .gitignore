@@ -2,6 +2,9 @@
 
 # dependencies
 /node_modules
+/DB_MIGRATION.md
+/IMPLEMENTATION.md
+/METADATA_SETUP.md
 /.pnp
 .pnp.*
 .yarn/*

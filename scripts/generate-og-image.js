@@ -30,22 +30,22 @@ async function generateOGImage() {
   ctx.fillStyle = '#FFFFFF';
   ctx.font = 'bold 72px Arial, sans-serif';
   ctx.textAlign = 'left';
-  ctx.fillText('Biblioteca Pandora', 420, 260);
+  ctx.fillText('Mundo Pandora', 420, 260);
 
   // Subtítulo
   ctx.font = '36px Arial, sans-serif';
   ctx.fillStyle = '#E0E7FF'; // blue-100
-  ctx.fillText('Retos diarios para pequeños exploradores', 420, 320);
+  ctx.fillText('Retos y aventuras educativas', 420, 320);
 
   // Texto adicional
   ctx.font = '28px Arial, sans-serif';
   ctx.fillStyle = '#DBEAFE'; // blue-50
-  ctx.fillText('✨ Matemáticas • Lectura crítica', 420, 380);
+  ctx.fillText('Matemáticas • Lectura crítica • Juegos', 420, 380);
 
   // Guardar imagen
   const buffer = canvas.toBuffer('image/png');
   fs.writeFileSync(path.join(__dirname, '../public/og-image.png'), buffer);
-  console.log('✅ OG image generated: public/og-image.png');
+  console.log('OG image generated: public/og-image.png');
 }
 
 generateOGImage().catch(console.error);

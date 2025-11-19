@@ -1,5 +1,5 @@
 -- ============================================
--- SQL PARA NEON DATABASE - BIBLIOTECA PANDORA
+-- SQL PARA NEON DATABASE - MUNDO PANDORA
 -- ============================================
 
 -- Este script crea:

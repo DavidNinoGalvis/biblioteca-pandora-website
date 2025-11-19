@@ -16,11 +16,11 @@
   <image href="/buho-pandora.png" x="90" y="165" width="300" height="300" />
   
   <!-- Texto principal -->
-  <text x="460" y="250" font-family="Quicksand, Arial, sans-serif" font-size="76" fill="#FFFFFF" font-weight="bold">Biblioteca Pandora</text>
+  <text x="460" y="250" font-family="Quicksand, Arial, sans-serif" font-size="76" fill="#FFFFFF" font-weight="bold">Mundo Pandora</text>
   
   <!-- Subtítulo -->
-  <text x="460" y="330" font-family="Quicksand, Arial, sans-serif" font-size="38" fill="#DBEAFE">Retos diarios para pequeños exploradores</text>
+  <text x="460" y="330" font-family="Quicksand, Arial, sans-serif" font-size="38" fill="#DBEAFE">Un mundo-juego educativo para niños</text>
   
   <!-- Características -->
-  <text x="460" y="400" font-family="Quicksand, Arial, sans-serif" font-size="30" fill="#FEF3C7">📚 Matemáticas • Lectura crítica • ¡Diversión!</text>
+  <text x="460" y="400" font-family="Quicksand, Arial, sans-serif" font-size="30" fill="#FEF3C7">🎮 Matemáticas • Lectura crítica • Aventuras</text>
 </svg>

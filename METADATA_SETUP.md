@@ -1,6 +1,6 @@
-# Metadatos y Assets de Biblioteca Pandora
+# Metadatos y Assets de Mundo Pandora
 
-## ✅ Archivos Creados
+## Archivos Creados
 
 ### Favicons e Iconos
 - `app/icon.png` - Icono principal de Next.js (192x192)
@@ -15,18 +15,18 @@
 ### PWA
 - `public/manifest.json` - Web App Manifest
 
-## 🎨 Colores Utilizados
-- **Fondo degradado**: `#3B82F6` → `#1E40AF` (azul)
+## Colores Utilizados
+- **Fondo degradado**: `#60A5FA` → `#2563EB` (azul videojuego)
 - **Tema principal**: `#3B82F6` (blue-500)
 - **Background app**: `#FFFBF0` (cream)
 
-## 📱 Vista Previa en WhatsApp
+## Vista Previa en WhatsApp
 Cuando compartas el link de la web, se mostrará:
-- ✅ Título: "Biblioteca Pandora"
-- ✅ Descripción: "Retos diarios para pequeños exploradores. Desafía tu mente con matemáticas y lectura crítica."
-- ✅ Imagen: Fondo azul con logo y texto
+- Título: "Mundo Pandora"
+- Descripción: "Un mundo-juego educativo: retos diarios para pequeños exploradores."
+- Imagen: Cartel estilo videojuego con el búho y título
 
-## 🔧 Configuración en `app/layout.tsx`
+## Configuración en `app/layout.tsx`
 Se configuraron los siguientes metadatos:
 - Open Graph (Facebook, WhatsApp)
 - Twitter Cards
@@ -34,19 +34,19 @@ Se configuraron los siguientes metadatos:
 - PWA manifest
 - Theme color
 
-## 📝 Variables de Entorno Recomendadas
+## Variables de Entorno Recomendadas
 Agrega a tu `.env`:
 ```
 NEXT_PUBLIC_BASE_URL=https://tu-dominio.com
 ```
 
-## 🚀 Próximos Pasos
+## Próximos Pasos
 1. Commit y push los cambios
 2. Despliega en Vercel
 3. Prueba compartir el link en WhatsApp para ver la preview
 4. Si quieres personalizar la imagen OG, edita `public/og-image.svg`
 
-## 🎨 Personalización
+## Personalización
 Para cambiar la imagen de Open Graph:
 1. Edita `public/og-image.svg` con tu diseño
 2. Convierte a PNG con: `qlmanage -t -s 1200 -o . og-image.svg && mv og-image.svg.png og-image.png`

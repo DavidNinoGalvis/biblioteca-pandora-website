@@ -10,12 +10,17 @@ datasource db {
 model User {
   id        String    @id @default(cuid())
   nickname  String    @unique
+  firstName String?
+  lastName  String?
+  desescolarizado Boolean @default(false)
+  hidden    Boolean   @default(false)
   pin       String    // PIN encriptado
   role      String    @default("student") // "student" o "admin"
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   
   completedChallenges CompletedChallenge[]
+  activeChallenge     ActiveChallenge?
   
   @@index([nickname])
   @@index([role])
@@ -52,4 +57,19 @@ model CompletedChallenge {
   @@index([userId])
   @@index([weekStart])
   @@index([completedAt])
+}
+
+model ActiveChallenge {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  type          String   // "Matemáticas" o "Lectura crítica"
+  question      String
+  options       Json     // Array de strings con las opciones
+  correctAnswer Int      // Índice de la respuesta correcta
+  startedAt     DateTime @default(now())
+  createdAt     DateTime @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
 }

@@ -42,7 +42,7 @@ export default function AdminLoginPage() {
   };
 
   return (
-  <div className="min-h-screen pt-4 px-6 bg-gradient-to-br from-blue-50 via-white to-orange-50 flex items-center justify-center">
+  <div className="min-h-screen pt-4 px-6 bg-linear-to-br from-blue-50 via-white to-orange-50 flex items-center justify-center">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -52,7 +52,7 @@ export default function AdminLoginPage() {
           {/* Header */}
           <div className="text-center mb-8">
             <div className="bg-blueDeep text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-              <Shield className="w-8 h-8" />
+              <Shield className="w-8 h-8 text-white" />
             </div>
             <h1 className="text-3xl font-black text-blueDeep mb-2">
               Acceso para Profesores
@@ -70,7 +70,7 @@ export default function AdminLoginPage() {
               </label>
               <div className="relative">
                 <div className="absolute left-3 top-1/2 -translate-y-1/2">
-                  <Lock className="w-5 h-5 text-gray-400" />
+                  <Lock className="w-5 h-5 text-blueDeep" />
                 </div>
                 <input
                   type={showPassword ? "text" : "password"}
@@ -83,7 +83,7 @@ export default function AdminLoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-blueDeep hover:text-blue-800"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>

@@ -2,15 +2,20 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import {
   TimerBadge,
   ChallengeTypeBadge,
   QuestionArea,
   ResultModal,
-  ActionButton,
   LoadingState,
 } from "./components";
-import { ArrowLeft } from "lucide-react";
+import {
+  Challenge,
+  ChallengeType,
+  challengeTypes,
+  getRandomChallenge,
+} from "./challenges";
 
 type User = {
   id: string;
@@ -18,47 +23,8 @@ type User = {
   role?: string;
 };
 
-type Challenge = {
-  type: "Matemáticas" | "Lectura crítica";
-  question: string;
-  options: string[];
-  correctAnswer: number;
-};
-
-// Banco de preguntas de ejemplo (puedes expandir esto más adelante)
-const challengeBank: Challenge[] = [
-  {
-    type: "Matemáticas",
-    question: "¿Cuánto es 12 + 8?",
-    options: ["18", "20", "22", "24"],
-    correctAnswer: 1,
-  },
-  {
-    type: "Matemáticas",
-    question: "Si tienes 5 manzanas y compras 3 más, ¿cuántas tienes en total?",
-    options: ["6", "7", "8", "9"],
-    correctAnswer: 2,
-  },
-  {
-    type: "Lectura crítica",
-    question: "María leyó un cuento sobre un gato que ayudaba a otros animales. ¿Qué palabra describe mejor al gato?",
-    options: ["Egoísta", "Amable", "Travieso", "Dormilón"],
-    correctAnswer: 1,
-  },
-  {
-    type: "Matemáticas",
-    question: "¿Cuánto es 7 × 3?",
-    options: ["18", "21", "24", "28"],
-    correctAnswer: 1,
-  },
-  {
-    type: "Lectura crítica",
-    question: "Pedro llegó tarde a la escuela porque se quedó dormido. ¿Cuál es la causa de que llegara tarde?",
-    options: ["La escuela está lejos", "Se quedó dormido", "Perdió el bus", "No tenía reloj"],
-    correctAnswer: 1,
-  },
-];
-
+const CHALLENGE_KEY = "bp_current_challenge";
+const CHALLENGE_TYPE_KEY = "bp_current_challenge_type";
 
 export default function RetoPage() {
   const router = useRouter();
@@ -69,72 +35,119 @@ export default function RetoPage() {
   const [isCorrect, setIsCorrect] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [timerRunning, setTimerRunning] = useState(false);
+  const [startTime, setStartTime] = useState<Date | null>(null);
 
   useEffect(() => {
     // Check if user is logged in
-    try {
-      const raw = localStorage.getItem("bp_user");
-      if (!raw) {
-        router.push("/");
-        return;
-      }
-      setUser(JSON.parse(raw));
+    const loadChallenge = async () => {
+      try {
+        const raw = localStorage.getItem("bp_user");
+        if (!raw) {
+          router.push("/");
+          return;
+        }
+        const parsedUser = JSON.parse(raw);
+        setUser(parsedUser);
 
-      // Get challenge type from localStorage or randomize
-      const storedType = localStorage.getItem("bp_current_challenge_type");
-      const challengeType = storedType || (Math.random() > 0.5 ? "Matemáticas" : "Lectura crítica");
-      
-      // Filter and select random challenge
-      const filtered = challengeBank.filter((c) => c.type === challengeType);
-      const randomChallenge = filtered[Math.floor(Math.random() * filtered.length)];
-      setChallenge(randomChallenge);
-      
-      // Start timer
-      setTimerRunning(true);
-    } catch (e) {
-      router.push("/");
-    }
+        // Try to load active challenge from database
+        const response = await fetch(
+          `/api/challenges/active?userId=${parsedUser.id}`
+        );
+        const data = await response.json();
+
+        if (data.activeChallenge) {
+          // User has an active challenge in the database
+          const activeChallenge = data.activeChallenge;
+          const challengeObj: Challenge = {
+            type: activeChallenge.type as ChallengeType,
+            question: activeChallenge.question,
+            options: activeChallenge.options,
+            correctAnswer: activeChallenge.correctAnswer,
+          };
+
+          setChallenge(challengeObj);
+          setStartTime(new Date(activeChallenge.startedAt));
+          setSeconds(activeChallenge.elapsedSeconds);
+          setTimerRunning(true);
+
+          // Also update localStorage
+          localStorage.setItem(CHALLENGE_TYPE_KEY, activeChallenge.type);
+          localStorage.setItem(CHALLENGE_KEY, JSON.stringify(challengeObj));
+          return;
+        }
+
+        // No active challenge in DB, try localStorage
+        const storedChallengeRaw = localStorage.getItem(CHALLENGE_KEY);
+        if (storedChallengeRaw) {
+          const storedChallenge = JSON.parse(storedChallengeRaw) as Challenge;
+          setChallenge(storedChallenge);
+          setTimerRunning(true);
+          return;
+        }
+
+        // No challenge found, redirect to dashboard
+        router.push("/dashboard");
+      } catch (e) {
+        console.error("Error loading challenge:", e);
+        router.push("/");
+      }
+    };
+
+    loadChallenge();
   }, [router]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (timerRunning) {
       interval = setInterval(() => {
-        setSeconds((s) => s + 1);
+        if (startTime) {
+          // Calculate elapsed time from database start time
+          const elapsed = Math.floor((Date.now() - startTime.getTime()) / 1000);
+          setSeconds(elapsed);
+        } else {
+          // Fallback to incrementing
+          setSeconds((s) => s + 1);
+        }
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [timerRunning]);
+  }, [timerRunning, startTime]);
 
   const handleAnswerSelect = (index: number) => {
     if (showResult) return;
     setSelectedAnswer(index);
+    handleSubmit(index);
   };
 
-  const handleSubmit = async () => {
-    if (selectedAnswer === null || !challenge || !user) return;
+  const handleSubmit = async (answerIndex?: number) => {
+    const resolvedAnswer =
+      typeof answerIndex === "number" ? answerIndex : selectedAnswer;
+    if (resolvedAnswer === null || !challenge || !user || showResult) return;
     
     setTimerRunning(false);
-    const correct = selectedAnswer === challenge.correctAnswer;
+    const correct = resolvedAnswer === challenge.correctAnswer;
     setIsCorrect(correct);
     setShowResult(true);
+    setSelectedAnswer(resolvedAnswer);
 
     // Save challenge to database via API
     try {
       // Mapear el tipo de challenge a los tipos de la base de datos
       const typeMapping: { [key: string]: string } = {
-        'Matemáticas': 'matematicas',
-        'Lectura crítica': 'lectura',
+        Matemáticas: "matematicas",
+        "Lectura crítica": "lectura",
       };
       
-      const mappedType = typeMapping[challenge.type] || challenge.type.toLowerCase();
+      const mappedType =
+        typeMapping[challenge.type] || challenge.type.toLowerCase();
 
-      const response = await fetch('/api/challenges/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/challenges/complete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: user.id,
           type: mappedType,
+          question: challenge.question,
           timeInSeconds: seconds,
           isCorrect: correct,
         }),
@@ -143,9 +156,17 @@ export default function RetoPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        console.error('Error saving challenge to database:', data.error || 'Unknown error');
+        console.error(
+          "Error saving challenge to database:",
+          data.error || "Unknown error"
+        );
       } else {
-        console.log('Challenge saved successfully:', data);
+        console.log("Challenge saved successfully:", data);
+        
+        // Delete active challenge from database
+        await fetch(`/api/challenges/active?userId=${user.id}`, {
+          method: "DELETE",
+        });
       }
     } catch (e) {
       console.error("Error saving challenge:", e);
@@ -153,6 +174,8 @@ export default function RetoPage() {
   };
 
   const handleContinue = () => {
+    localStorage.removeItem(CHALLENGE_KEY);
+    localStorage.removeItem(CHALLENGE_TYPE_KEY);
     router.push("/dashboard");
   };
 
@@ -161,7 +184,7 @@ export default function RetoPage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 px-3 md:px-6 lg:px-8 pt-12 pb-4 overflow-hidden">
+    <div className="relative min-h-screen w-full overflow-hidden bg-linear-to-br from-blue-50 via-white to-orange-50">
       <button
         onClick={() => router.push("/dashboard")}
         className="fixed left-4 top-20 md:top-32 z-50 inline-flex items-center gap-2 bg-white/95 text-gray-800 px-3 py-2 rounded-lg shadow-sm hover:shadow-md transition"
@@ -172,6 +195,7 @@ export default function RetoPage() {
 
       <TimerBadge seconds={seconds} />
       
+      <div className="flex flex-col items-center justify-center gap-6 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-10 py-10">
       <ChallengeTypeBadge type={challenge.type} />
 
       <QuestionArea
@@ -181,18 +205,13 @@ export default function RetoPage() {
         isCorrect={isCorrect}
         onAnswerSelect={handleAnswerSelect}
       />
+      </div>
 
-      {showResult ? (
+      {showResult && (
         <ResultModal
           isCorrect={isCorrect}
           seconds={seconds}
           onContinue={handleContinue}
-        />
-      ) : (
-        <ActionButton
-          showResult={showResult}
-          selectedAnswer={selectedAnswer}
-          onSubmit={handleSubmit}
         />
       )}
     </div>

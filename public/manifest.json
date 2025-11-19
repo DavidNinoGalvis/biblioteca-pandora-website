@@ -1,7 +1,7 @@
 {
-  "name": "Biblioteca Pandora",
-  "short_name": "Pandora",
-  "description": "Retos diarios para pequeños exploradores",
+  "name": "Mundo Pandora",
+  "short_name": "Mundo",
+  "description": "Un mundo-juego educativo: retos diarios para pequeños exploradores",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FFFBF0",

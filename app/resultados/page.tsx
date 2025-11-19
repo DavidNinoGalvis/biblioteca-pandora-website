@@ -85,7 +85,7 @@ export default function ResultadosPage() {
 
   return (
     <div className="min-h-screen pt-32 px-6 md:px-8 lg:px-12 bg-gradient-to-br from-white to-blue-50 flex flex-col items-center">
-  <div className="w-full max-w-3xl md:max-w-5xl lg:max-w-6xl xl:max-w-7xl">
+      <div className="w-full max-w-5xl">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl md:text-4xl font-black text-blueDeep">Tabla de posiciones</h1>
@@ -98,37 +98,17 @@ export default function ResultadosPage() {
           </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2 bg-white rounded-2xl shadow-medium p-6">
-            <LeaderboardList entries={leaderboard} onAddSample={addSample} />
-          </div>
+        <div className="bg-white rounded-2xl shadow-medium p-6">
+          <LeaderboardList entries={leaderboard} onAddSample={addSample} />
+        </div>
 
-          <aside className="bg-white rounded-2xl shadow-medium p-6 flex flex-col gap-6">
-            <div>
-              <h3 className="text-sm text-gray-500 mb-2">Top de la semana</h3>
-              <div className="space-y-3">
-                {leaderboard.slice(0, 3).map((e, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-blueSky text-white flex items-center justify-center font-bold">{i + 1}</div>
-                    <div>
-                      <div className="font-bold text-sm">{e.nickname}</div>
-                      <div className="text-xs text-gray-500">{e.totalPoints} pts</div>
-                    </div>
-                  </div>
-                ))}
-                {leaderboard.length === 0 && <div className="text-sm text-gray-500">No hay datos aún</div>}
-              </div>
-            </div>
-
-            <div>
-              <CountdownBadge days={countdown.days} hours={countdown.hours} minutes={countdown.minutes} seconds={countdown.seconds} />
-            </div>
-
-            <ResultsControls
-              onReset={() => { console.log("Reset functionality removed - using database"); }}
-              onAddSample={addSample}
-            />
-          </aside>
+        <div className="mt-6">
+          <button
+            onClick={() => router.back()}
+            className="px-6 py-3 rounded-lg bg-white border-2 border-gray-200 text-gray-800 hover:shadow-md hover:bg-gray-50 text-lg font-medium transition-all"
+          >
+            Volver
+          </button>
         </div>
       </div>
     </div>

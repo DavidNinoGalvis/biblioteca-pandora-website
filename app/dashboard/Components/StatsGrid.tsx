@@ -1,13 +1,13 @@
 import { motion } from "framer-motion";
-import { Target, Timer, Zap } from "lucide-react";
+import { Target, Star, Zap } from "lucide-react";
 
 type StatsGridProps = {
   totalChallenges: number;
-  avgTime: number;
+  totalPoints: number;
   bestTime: number;
 };
 
-export default function StatsGrid({ totalChallenges, avgTime, bestTime }: StatsGridProps) {
+export default function StatsGrid({ totalChallenges, totalPoints, bestTime }: StatsGridProps) {
   const formatTime = (secs: number) => {
     const m = Math.floor(secs / 60);
     const s = secs % 60;
@@ -38,21 +38,21 @@ export default function StatsGrid({ totalChallenges, avgTime, bestTime }: StatsG
         <div className="text-sm text-grayMuted mt-1">¡Sigue así!</div>
       </motion.div>
 
-      {/* Average Time */}
+      {/* Total Points */}
       <motion.div
         whileHover={{ y: -5 }}
-        className="card bg-gradient-to-br from-orange-50 to-white border-2 border-orangeAccent/30"
+        className="card bg-gradient-to-br from-yellow-50 to-white border-2 border-yellow-400/30"
       >
         <div className="flex items-center justify-between mb-3">
-          <div className="bg-orangeAccent text-white rounded-full p-3">
-            <Timer className="w-6 h-6" />
+          <div className="bg-yellow-400 text-white rounded-full p-3">
+            <Star className="w-6 h-6" fill="currentColor" />
           </div>
-          <div className="text-4xl font-black text-orangeAccent">
-            {avgTime > 0 ? formatTime(avgTime) : "—"}
+          <div className="text-4xl font-black text-yellow-600">
+            {totalPoints}
           </div>
         </div>
-        <div className="font-bold text-gray-800">Tiempo promedio</div>
-        <div className="text-sm text-grayMuted mt-1">Por reto</div>
+        <div className="font-bold text-gray-800">Puntos totales</div>
+        <div className="text-sm text-grayMuted mt-1">¡Sigue sumando!</div>
       </motion.div>
 
       {/* Best Time */}
