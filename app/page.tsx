@@ -99,28 +99,16 @@ export default function Home() {
         </p>
 
         {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 items-center justify-center mb-8">
+        <div className="flex items-center justify-center mb-8">
           <motion.button
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.95 }}
             onClick={handlePlayClick}
-            className="w-48 bg-linear-to-r from-blueSky to-blue-600 text-white px-6 py-3 rounded-2xl font-black text-lg shadow-2xl hover:shadow-blue-300/50 transition-shadow"
+            className="w-64 bg-linear-to-r from-blueSky to-blue-600 text-white px-8 py-5 rounded-2xl font-black text-2xl shadow-2xl hover:shadow-blue-300/50 transition-shadow"
           >
-            <div className="flex items-center justify-center gap-2">
-              <Rocket className="w-5 h-5" />
+            <div className="flex items-center justify-center gap-3">
+              <Rocket className="w-7 h-7" />
               Jugar
-            </div>
-          </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => router.push("/dashboard")}
-            className="w-48 bg-white border-3 border-blueSky text-blueSky px-6 py-3 rounded-2xl font-bold text-lg shadow-lg hover:bg-blue-50 transition-colors"
-          >
-            <div className="flex items-center justify-center gap-2">
-              <Star className="w-5 h-5" />
-              {user?.nickname ? "Mi Perfil" : "Crear Perfil"}
             </div>
           </motion.button>
         </div>
