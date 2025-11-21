@@ -63,16 +63,12 @@ export async function POST(request: NextRequest) {
 
     // Si se provee ageGroup y el usuario no lo tiene, actualizarlo
     if (ageGroup && !user.ageGroup) {
-      user = await prisma.user.update({
+      await prisma.user.update({
         where: { id: user.id },
         data: { ageGroup },
-        select: {
-          id: true,
-          nickname: true,
-          role: true,
-          ageGroup: true,
-        },
       });
+      // Actualizar el objeto user con el nuevo ageGroup
+      user.ageGroup = ageGroup as any;
     }
 
     // Login exitoso
