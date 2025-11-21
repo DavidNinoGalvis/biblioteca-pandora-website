@@ -34,6 +34,7 @@ export async function POST(request: NextRequest) {
     const {
       nickname: rawNickname,
       pin,
+      ageGroup,
       desescolarizado,
       firstName,
       lastName,
@@ -42,6 +43,13 @@ export async function POST(request: NextRequest) {
     if (!pin) {
       return NextResponse.json(
         { error: "El PIN es requerido" },
+        { status: 400 }
+      );
+    }
+
+    if (!ageGroup) {
+      return NextResponse.json(
+        { error: "El rango de edad es requerido" },
         { status: 400 }
       );
     }
@@ -109,6 +117,7 @@ export async function POST(request: NextRequest) {
         nickname,
         pin: hashedPin,
         role: "student",
+        ageGroup,
         desescolarizado: !!desescolarizado,
         firstName: firstName?.trim() || null,
         lastName: lastName?.trim() || null,

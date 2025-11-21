@@ -25,6 +25,7 @@ export default function StudentManager({ initialStudents }: Props) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [pin, setPin] = useState("");
+  const [ageGroup, setAgeGroup] = useState("");
   const [showPin, setShowPin] = useState(false);
   const [desescolarizado, setDesescolarizado] = useState(false);
   const [secretMessage, setSecretMessage] = useState("");
@@ -43,6 +44,12 @@ export default function StudentManager({ initialStudents }: Props) {
       return;
     }
 
+    if (!ageGroup) {
+      setError("Debes seleccionar un rango de edad");
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch("/api/admin/students", {
         method: "POST",
@@ -50,6 +57,7 @@ export default function StudentManager({ initialStudents }: Props) {
         body: JSON.stringify({
           nickname: nickname.trim(),
           pin,
+          ageGroup,
           desescolarizado,
           firstName,
           lastName,
@@ -74,6 +82,7 @@ export default function StudentManager({ initialStudents }: Props) {
       setFirstName("");
       setLastName("");
       setPin("");
+      setAgeGroup("");
       setDesescolarizado(false);
       setShowModal(false);
       setError("");
@@ -367,6 +376,25 @@ export default function StudentManager({ initialStudents }: Props) {
                         disabled={loading}
                       />
                     </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">
+                      Rango de edad *
+                    </label>
+                    <select
+                      value={ageGroup}
+                      onChange={(e) => setAgeGroup(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blueSky focus:outline-none text-base"
+                      disabled={loading}
+                      required
+                    >
+                      <option value="">Selecciona el rango de edad</option>
+                      <option value="A6_7">6-7 años</option>
+                      <option value="A8_10">8-10 años</option>
+                      <option value="A11_13">11-13 años</option>
+                      <option value="A14_15">14-15 años</option>
+                    </select>
                   </div>
 
                   <div>
