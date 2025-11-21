@@ -17,6 +17,7 @@ export default function LoginModal({
 }: LoginModalProps) {
   const [nickname, setNickname] = useState("");
   const [pin, setPin] = useState("");
+  const [ageGroup, setAgeGroup] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -32,13 +33,17 @@ export default function LoginModal({
       setError("El PIN debe contener 4 números");
       return;
     }
+    if (!ageGroup) {
+      setError("Selecciona tu rango de edad");
+      return;
+    }
 
     setLoading(true);
     try {
       const response = await fetch("/api/auth/student", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nickname: nickname.trim(), pin }),
+        body: JSON.stringify({ nickname: nickname.trim(), pin, ageGroup }),
       });
 
       const data = await response.json();
@@ -53,6 +58,7 @@ export default function LoginModal({
       localStorage.setItem("bp_user", JSON.stringify(user));
       setNickname("");
       setPin("");
+      setAgeGroup("");
       setError("");
       // Notify other components (navbar) about login
       try {
@@ -135,6 +141,20 @@ export default function LoginModal({
               disabled={loading}
               className="px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blueSky focus:outline-none w-full text-base disabled:opacity-50"
             />
+
+            <select
+              aria-label="Rango de edad"
+              value={ageGroup}
+              onChange={(e) => setAgeGroup(e.target.value)}
+              disabled={loading}
+              className="px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blueSky focus:outline-none w-full text-base disabled:opacity-50"
+            >
+              <option value="">Selecciona tu edad</option>
+              <option value="A6_7">6-7 años</option>
+              <option value="A8_10">8-10 años</option>
+              <option value="A11_13">11-13 años</option>
+              <option value="A14_15">14-15 años</option>
+            </select>
 
             {error && (
               <motion.div

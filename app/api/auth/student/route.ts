@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { nickname, pin } = body;
+    const { nickname, pin, ageGroup } = body;
 
     // Validar datos requeridos
     if (!nickname || !pin) {
@@ -26,13 +26,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Buscar usuario por nickname
-    const user = await prisma.user.findUnique({
+    let user = await prisma.user.findUnique({
       where: { nickname },
       select: {
         id: true,
         nickname: true,
         pin: true,
         role: true,
+        ageGroup: true,
       },
     });
 
@@ -60,6 +61,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Si se provee ageGroup y el usuario no lo tiene, actualizarlo
+    if (ageGroup && !user.ageGroup) {
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: { ageGroup },
+        select: {
+          id: true,
+          nickname: true,
+          role: true,
+          ageGroup: true,
+        },
+      });
+    }
+
     // Login exitoso
     return NextResponse.json({
       success: true,
@@ -67,6 +82,7 @@ export async function POST(request: NextRequest) {
         id: user.id,
         nickname: user.nickname,
         role: user.role,
+        ageGroup: user.ageGroup,
       },
     });
   } catch (error) {

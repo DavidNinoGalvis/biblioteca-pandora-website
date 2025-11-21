@@ -4,12 +4,13 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { BookOpen, Trophy, LogIn, Target, Star, Shield, X } from "lucide-react";
-import { challengeTypes, getRandomChallenge } from "../reto/challenges";
+import { challengeTypes, getRandomChallenge, AgeGroup } from "../reto/challenges";
 
 type User = {
   id: string;
   nickname: string;
   role?: string;
+  ageGroup?: AgeGroup | string;
 };
 
 const CHALLENGE_KEY = "bp_current_challenge";
@@ -121,7 +122,7 @@ export default function Navbar() {
       // No tiene reto activo, asignar uno nuevo
       const chosenType =
         challengeTypes[Math.floor(Math.random() * challengeTypes.length)];
-      const selectedChallenge = getRandomChallenge(chosenType);
+      const selectedChallenge = getRandomChallenge(chosenType, (user as any)?.ageGroup as AgeGroup | undefined);
 
       // Guardar en la base de datos
       const response = await fetch("/api/challenges/active", {

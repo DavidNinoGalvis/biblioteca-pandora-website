@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CountdownBadge, LeaderboardList, ResultsControls } from "./components";
+import { CountdownBadge, RaceTrack } from "./components";
 
 type LeaderboardEntry = {
   userId: string;
@@ -84,12 +84,12 @@ export default function ResultadosPage() {
   };
 
   return (
-    <div className="min-h-screen pt-32 px-6 md:px-8 lg:px-12 bg-gradient-to-br from-white to-blue-50 flex flex-col items-center">
-      <div className="w-full max-w-5xl">
+    <div className="min-h-screen pt-32 px-6 md:px-8 lg:px-12 bg-linear-to-br from-blue-50 via-white to-orange-50 flex flex-col items-center">
+      <div className="w-full max-w-6xl">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl md:text-4xl font-black text-blueDeep">Tabla de posiciones</h1>
-            <p className="text-sm text-gray-600">Lista semanal de estudiantes — se reinicia cada domingo</p>
+            <h1 className="text-3xl md:text-4xl font-black text-blueDeep">Carrera de Ganadores</h1>
+            <p className="text-sm text-gray-600">Los carritos avanzan según los puntos — se reinicia cada domingo</p>
           </div>
 
           <div>
@@ -98,8 +98,8 @@ export default function ResultadosPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-medium p-6">
-          <LeaderboardList entries={leaderboard} onAddSample={addSample} />
+        <div className="bg-white/50 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-gray-200">
+          <RaceTrack entries={leaderboard} />
         </div>
 
         <div className="mt-6">

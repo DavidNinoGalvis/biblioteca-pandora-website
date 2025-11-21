@@ -12,6 +12,7 @@ function StudentLoginForm() {
 
   const [nickname, setNickname] = useState("");
   const [pin, setPin] = useState("");
+  const [ageGroup, setAgeGroup] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -21,13 +22,14 @@ function StudentLoginForm() {
     setError("");
     if (!nickname.trim()) return setError("Necesitas ingresar un apodo");
     if (!validatePin(pin)) return setError("El PIN debe contener 4 números");
+    if (!ageGroup) return setError("Selecciona tu rango de edad");
 
     setLoading(true);
     try {
       const response = await fetch("/api/auth/student", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nickname: nickname.trim(), pin }),
+        body: JSON.stringify({ nickname: nickname.trim(), pin, ageGroup }),
       });
 
       const data = await response.json();
@@ -80,6 +82,20 @@ function StudentLoginForm() {
             type="password"
             className="px-3 py-2 rounded-lg border-2 border-gray-200 focus:border-blueSky focus:outline-none w-full"
           />
+
+          <select
+            aria-label="Rango de edad"
+            value={ageGroup}
+            onChange={(e) => setAgeGroup(e.target.value)}
+            disabled={loading}
+            className="px-3 py-2 rounded-lg border-2 border-gray-200 focus:border-blueSky focus:outline-none w-full disabled:opacity-50"
+          >
+            <option value="">Selecciona tu edad</option>
+            <option value="A6_7">6-7 años</option>
+            <option value="A8_10">8-10 años</option>
+            <option value="A11_13">11-13 años</option>
+            <option value="A14_15">14-15 años</option>
+          </select>
 
           {error && (
             <div className="text-redDanger text-sm font-semibold">{error}</div>

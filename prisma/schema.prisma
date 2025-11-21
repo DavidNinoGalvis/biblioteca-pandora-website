@@ -2,6 +2,13 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum AgeGroup {
+  A6_7
+  A8_10
+  A11_13
+  A14_15
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -14,6 +21,7 @@ model User {
   lastName  String?
   desescolarizado Boolean @default(false)
   hidden    Boolean   @default(false)
+  ageGroup  AgeGroup?
   pin       String    // PIN encriptado
   role      String    @default("student") // "student" o "admin"
   createdAt DateTime  @default(now())
@@ -33,6 +41,7 @@ model QuestionBank {
   options       Json     // Array de strings ["opción 1", "opción 2", ...]
   correctAnswer Int      // Índice de la respuesta correcta (0-3)
   difficulty    String   @default("medium") // "easy", "medium", "hard"
+  ageGroup      AgeGroup
   active        Boolean  @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -48,6 +57,7 @@ model CompletedChallenge {
   question      String
   timeInSeconds Int
   isCorrect     Boolean
+  ageGroup  AgeGroup?
   points        Int      @default(0)
   completedAt   DateTime @default(now())
   weekStart     DateTime // Para agrupar por semanas
